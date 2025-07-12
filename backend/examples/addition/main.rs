@@ -40,16 +40,19 @@ fn set_inputs(lattice: &mut SpikeTrainLattice<IonotropicNeurotransmitterType, Pr
     });
 }
 
-fn teacher_force(lattice: &mut Lattice<IzhikevichNeuron<ApproximateNeurotransmitter, ApproximateReceptor>, spiking_neural_networks::graph::AdjacencyMatrix<(usize, usize), f32>, GridVoltageHistory, STDP, IonotropicNeurotransmitterType>, target: usize) {
+fn reset_outputs(
+    lattice: &mut Lattice<
+        IzhikevichNeuron<ApproximateNeurotransmitter, ApproximateReceptor>,
+        spiking_neural_networks::graph::AdjacencyMatrix<(usize, usize), f32>,
+        GridVoltageHistory,
+        STDP,
+        IonotropicNeurotransmitterType,
+    >,
+) {
     lattice.apply(|n| {
         n.current_voltage = n.v_init;
         n.is_spiking = false;
         n.last_firing_time = None;
-    });
-    lattice.apply_given_position(|(idx, _), n| {
-        if idx == target {
-            n.current_voltage = n.v_th + 5.0;
-        }
     });
 }
 
@@ -80,9 +83,9 @@ fn main() -> Result<(), SpikingNeuralNetworksError> {
     network.chemical_synapse = false;
 
     for epoch in 0..1000 {
-        for (i, &(a, b, sum)) in train.iter().enumerate() {
+        for (i, &(a, b, _sum)) in train.iter().enumerate() {
             set_inputs(network.get_mut_spike_train_lattice(&0).unwrap(), a, b);
-            teacher_force(network.get_mut_lattice(&1).unwrap(), sum as usize);
+            reset_outputs(network.get_mut_lattice(&1).unwrap());
             network.run_lattices(1)?;
             if (i + 1) % 1000 == 0 {
                 network.reset_timing();
