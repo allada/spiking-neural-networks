@@ -39,6 +39,12 @@ See below for examples and how to add custom models.
 
 See [`examples folder`](https://docs.rs/crate/spiking_neural_networks/latest/source/examples/) for more examples.
 
+To run the STDP addition demo:
+
+```bash
+cargo run --example addition --release
+```
+
 ### Interacting lattices of neurons with inhibitory and excitatory input
 
 ```rust
