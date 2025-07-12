@@ -427,3 +427,9 @@ EEG processing with fourier transforms, and power spectral density calculations
 - antipsychotics sim paper
 - dopamine model with hodgkin huxley
 - biological signal processing richard b wells
+## Running Addition Example
+Run with:
+
+```bash
+cargo run --example addition --release
+```
