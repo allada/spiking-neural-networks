@@ -89,7 +89,26 @@ fn main() -> Result<(), SpikingNeuralNetworksError> {
             }
         }
         train.shuffle(&mut rand::thread_rng());
-        println!("finished epoch {}", epoch + 1);
+        let mut correct = 0usize;
+        for &(a, b, sum) in &test {
+            set_inputs(network.get_mut_spike_train_lattice(&0).unwrap(), a, b);
+            network.get_mut_lattice(&1).unwrap().apply(|n| { n.is_spiking = false; });
+            network.run_lattices(1)?;
+            let lattice = network.get_lattice(&1).unwrap();
+            let mut best_idx = 0usize;
+            let mut best_voltage = f32::MIN;
+            for (idx, row) in lattice.cell_grid().iter().enumerate() {
+                let neuron = &row[0];
+                let v = neuron.current_voltage;
+                if neuron.is_spiking || v > best_voltage {
+                    best_voltage = v;
+                    best_idx = idx;
+                }
+            }
+            if best_idx as u8 == sum { correct += 1; }
+        }
+        let accuracy = correct as f32 / test.len() as f32;
+        println!("Epoch {} accuracy: {}", epoch + 1, accuracy);
     }
 
     let mut correct = 0usize;
